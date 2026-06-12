@@ -8,4 +8,10 @@
     <!-- Folder where production build objects will be placed -->
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include=".github\workflows\close-review-pr.yml" />
+    <None Include=".github\workflows\create-review-pr.yml" />
+    <None Include=".github\workflows\ci.yml" />
+    <None Include=".github\workflows\github-actions-demo.yml" />
+  </ItemGroup>
 </Project>

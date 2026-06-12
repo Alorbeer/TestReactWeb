@@ -1,0 +1,36 @@
+name: Review-PR schließen
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  close-review-pr:
+    name: Review-PR schließen und Einchecker benachrichtigen
+    runs-on: ubuntu-latest
+    # Nur für automatisch erstellte Review-PRs
+    if: contains(github.event.pull_request.labels.*.name, 'auto-review')
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Einchecker bei Anmerkungen benachrichtigen
+        if: github.event.review.state == 'changes_requested'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "⚠️ @${{ github.event.pull_request.user.login }} Copilot hat Anmerkungen zu deinem Push auf \`${{ github.event.pull_request.head.ref }}\` gefunden. Bitte prüfe die Review-Kommentare oben."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: PR schließen (kein Merge)
+        run: |
+          gh pr close ${{ github.event.pull_request.number }} \
+            --comment "🔒 Review abgeschlossen – PR wird automatisch geschlossen. Der Code verbleibt auf Branch \`${{ github.event.pull_request.head.ref }}\`."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
