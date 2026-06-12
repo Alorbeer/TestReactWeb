@@ -14,10 +14,17 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      issues: write
 
     steps:
       - name: Code auschecken
         uses: actions/checkout@v4
+
+      - name: Label sicherstellen
+        run: |
+          gh label create "auto-review" --color "0075ca" --description "Automatisch erstellter Review-PR" --force
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Review-PR erstellen
         run: |
