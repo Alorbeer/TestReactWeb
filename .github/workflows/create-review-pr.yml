@@ -42,17 +42,29 @@ jobs:
 
           if [ -z "$EXISTING_PR" ]; then
             echo "Kein PR gefunden – erstelle neuen PR..."
-            gh pr create \
+            PR_URL=$(gh pr create \
               --title "$TITLE" \
               --body "$BODY" \
               --base main \
               --head "${{ github.ref_name }}" \
-              --label "auto-review"
+              --label "auto-review")
+            EXISTING_PR=$(echo "$PR_URL" | grep -o '[0-9]*$')
           else
             echo "PR #$EXISTING_PR existiert bereits – aktualisiere..."
             gh pr edit "$EXISTING_PR" \
               --title "$TITLE" \
               --body "$BODY"
           fi
+
+          echo "PR_NUMBER=$EXISTING_PR" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reviewer anfordern
+        run: |
+          gh api \
+            --method POST \
+            repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/requested_reviewers \
+            --field 'team_reviewers[]=<EUER-TEAM-SLUG>'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
