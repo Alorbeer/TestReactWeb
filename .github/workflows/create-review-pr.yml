@@ -26,16 +26,33 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Review-PR erstellen
+      - name: Review-PR erstellen oder aktualisieren
         run: |
-          gh pr create \
-            --title "🤖 Auto-Review: ${{ github.ref_name }} (${{ github.sha }})" \
-            --body "Automatischer Review-PR für Commit \`${{ github.sha }}\` von @${{ github.actor }}.
+          TITLE="🤖 Auto-Review: ${{ github.ref_name }} (${{ github.sha }})"
+          BODY="Automatischer Review-PR für Commit \`${{ github.sha }}\` von @${{ github.actor }}.
 
-            > Dieser PR dient nur dem Code Review und wird nach dem Review automatisch geschlossen.
-            > Der Code verbleibt auf Branch \`${{ github.ref_name }}\`." \
+          > Dieser PR dient nur dem Code Review und wird nach dem Review automatisch geschlossen.
+          > Der Code verbleibt auf Branch \`${{ github.ref_name }}\`."
+
+          EXISTING_PR=$(gh pr list \
+            --head "${{ github.ref_name }}" \
             --base main \
-            --head ${{ github.ref_name }} \
-            --label "auto-review"
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -z "$EXISTING_PR" ]; then
+            echo "Kein PR gefunden – erstelle neuen PR..."
+            gh pr create \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --base main \
+              --head "${{ github.ref_name }}" \
+              --label "auto-review"
+          else
+            echo "PR #$EXISTING_PR existiert bereits – aktualisiere..."
+            gh pr edit "$EXISTING_PR" \
+              --title "$TITLE" \
+              --body "$BODY"
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
