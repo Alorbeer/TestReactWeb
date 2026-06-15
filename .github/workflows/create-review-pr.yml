@@ -60,11 +60,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Reviewer anfordern
+      - name: Copilot Review anfordern
         run: |
           gh api \
             --method POST \
             repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/requested_reviewers \
-            --field 'team_reviewers[]=<EUER-TEAM-SLUG>'
+            --field 'reviewers[]=copilot-pull-request-reviewer'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
