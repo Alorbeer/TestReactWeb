@@ -3,13 +3,21 @@ name: Review-PR schließen
 on:
   pull_request_review:
     types: [submitted]
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+      branch_name:
+        required: true
+        type: string
 
 jobs:
   close-review-pr:
     name: Review-PR schließen und Einchecker benachrichtigen
     runs-on: ubuntu-latest
-    # Nur für automatisch erstellte Review-PRs
-    if: contains(github.event.pull_request.labels.*.name, 'auto-review')
+    # Nur für automatisch erstellte Review-PRs oder wenn direkt aufgerufen
+    if: github.event_name == 'workflow_call' || contains(github.event.pull_request.labels.*.name, 'auto-review')
 
     permissions:
       contents: read
@@ -21,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Einchecker bei Anmerkungen benachrichtigen
-        if: github.event.review.state == 'changes_requested'
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'changes_requested'
         run: |
           gh pr comment ${{ github.event.pull_request.number }} \
             --body "⚠️ @${{ github.event.pull_request.user.login }} Copilot hat Anmerkungen zu deinem Push auf \`${{ github.event.pull_request.head.ref }}\` gefunden. Bitte prüfe die Review-Kommentare oben."
@@ -29,8 +37,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: PR schließen (kein Merge)
-        run: |
-          gh pr close ${{ github.event.pull_request.number }} \
-            --comment "🔒 Review abgeschlossen – PR wird automatisch geschlossen. Der Code verbleibt auf Branch \`${{ github.event.pull_request.head.ref }}\`."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event_name == 'workflow_call' && inputs.pr_number || github.event.pull_request.number }}
+          BRANCH: ${{ github.event_name == 'workflow_call' && inputs.branch_name || github.event.pull_request.head.ref }}
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_call" ]; then
+            COMMENT="♻️ Wird durch neuen Review-PR für Commit \`${{ github.sha }}\` ersetzt."
+          else
+            COMMENT="🔒 Review abgeschlossen – PR wird automatisch geschlossen. Der Code verbleibt auf Branch \`${BRANCH}\`."
+          fi
+          gh pr close "${PR_NUMBER}" --comment "${COMMENT}"

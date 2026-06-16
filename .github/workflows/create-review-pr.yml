@@ -7,14 +7,15 @@ on:
       - 'release/**'
 
 jobs:
-  create-review-pr:
-    name: Temporären Review-PR erstellen
+  find-existing-pr:
+    name: Label sicherstellen und PR suchen
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
       issues: write
+    outputs:
+      pr_number: ${{ steps.find.outputs.pr_number }}
 
     steps:
       - name: Code auschecken
@@ -26,37 +27,57 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Review-PR erstellen oder aktualisieren
+      - id: find
+        name: Bestehenden PR suchen
         run: |
-          TITLE="🤖 Auto-Review: ${{ github.ref_name }} (${{ github.sha }})"
-          BODY="Automatischer Review-PR für Commit \`${{ github.sha }}\` von @${{ github.actor }}.
-
-          > Dieser PR dient nur dem Code Review und wird nach dem Review automatisch geschlossen.
-          > Der Code verbleibt auf Branch \`${{ github.ref_name }}\`."
-
           EXISTING_PR=$(gh pr list \
             --head "${{ github.ref_name }}" \
             --base main \
             --json number \
             --jq '.[0].number // empty')
+          echo "pr_number=${EXISTING_PR}" >> $GITHUB_OUTPUT
+          echo "Gefundene PR-Nummer: ${EXISTING_PR:-keine}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          if [ -z "$EXISTING_PR" ]; then
-            echo "Kein PR gefunden – erstelle neuen PR..."
-            PR_URL=$(gh pr create \
-              --title "$TITLE" \
-              --body "$BODY" \
-              --base main \
-              --head "${{ github.ref_name }}" \
-              --label "auto-review")
-            EXISTING_PR=$(echo "$PR_URL" | grep -o '[0-9]*$')
-          else
-            echo "PR #$EXISTING_PR existiert bereits – aktualisiere..."
-            gh pr edit "$EXISTING_PR" \
-              --title "$TITLE" \
-              --body "$BODY"
-          fi
+  close-existing-pr:
+    name: Bestehenden PR schließen
+    needs: find-existing-pr
+    if: needs.find-existing-pr.outputs.pr_number != ''
+    uses: ./.github/workflows/close-review-pr.yml
+    with:
+      pr_number: ${{ needs.find-existing-pr.outputs.pr_number }}
+      branch_name: ${{ github.ref_name }}
+    secrets: inherit
 
-          echo "PR_NUMBER=$EXISTING_PR" >> $GITHUB_ENV
+  create-new-pr:
+    name: Neuen Review-PR erstellen
+    needs: [find-existing-pr, close-existing-pr]
+    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Neuen Review-PR erstellen
+        run: |
+          PR_URL=$(gh pr create \
+            --title "🤖 Auto-Review: ${{ github.ref_name }} (${{ github.sha }})" \
+            --body "Automatischer Review-PR für Commit \`${{ github.sha }}\` von @${{ github.actor }}.
+
+          > Dieser PR dient nur dem Code Review und wird nach dem Review automatisch geschlossen.
+          > Der Code verbleibt auf Branch \`${{ github.ref_name }}\`." \
+            --base main \
+            --head "${{ github.ref_name }}" \
+            --label "auto-review")
+          PR_NUMBER=$(echo "$PR_URL" | grep -o '[0-9]*$')
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          echo "Neuer PR #$PR_NUMBER erstellt: $PR_URL"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
