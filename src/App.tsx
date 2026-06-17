@@ -10,21 +10,22 @@ function App() {
   const [count2, setCount2] = useState(0)
   const { t, i18n } = useTranslation()
 
-  const toggleLanguage = () => {
-    i18n.changeLanguage(i18n.language.startsWith('de') ? 'en' : 'de')
-  }
+  const currentLang = i18n.language.split('-')[0]
 
   return (
     <>
       <section id="center">
-        <button
-          type="button"
-          className="lang-switch"
-          onClick={toggleLanguage}
-          aria-label="Switch language"
+        <select
+          className="lang-select"
+          value={currentLang}
+          onChange={(e) => i18n.changeLanguage(e.target.value)}
+          aria-label="Select language"
         >
-          {t('language.switchTo')}
-        </button>
+          <option value="en">???? English</option>
+          <option value="de">???? Deutsch</option>
+          <option value="fr">???? Français</option>
+          <option value="zh">???? ??</option>
+        </select>
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
           <img src={reactLogo} className="framework" alt="React logo" />
