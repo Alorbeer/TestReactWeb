@@ -51,6 +51,12 @@ jobs:
             FEATURE=$(echo "$DECORATIONS" | grep -oP "(?<=feature/)[^,\s]+" | head -1 || true)
           fi
 
+          # Fallback: "feature/xyz" irgendwo in der Commit-Message suchen
+          if [ -z "$FEATURE" ]; then
+            echo "Suche 'feature/' direkt in der Merge-Message..."
+            FEATURE=$(echo "$MERGE_MSG" | grep -oP "(?<=feature/)[a-zA-Z0-9_-]+" | head -1 || true)
+          fi
+
           if [ -z "$FEATURE" ]; then
             echo "Kein Feature-Branch-Merge erkannt – Pipeline wird übersprungen."
             echo "is_feature_merge=false" >> $GITHUB_OUTPUT
