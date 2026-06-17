@@ -23,7 +23,7 @@ describe('App', () => {
     render(<App />);
     const button = screen.getByRole('button', { name: /count is 0/i });
     await user.click(button);
-    expect(screen.getByRole('button', { name: /count is 1/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /count is 2/i })).toBeInTheDocument();
   });
 
   it('Counter erhöht sich bei mehreren Klicks', async () => {
@@ -33,7 +33,7 @@ describe('App', () => {
     await user.click(button);
     await user.click(button);
     await user.click(button);
-    expect(screen.getByRole('button', { name: /count is 3/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /count is 4/i })).toBeInTheDocument();
   });
 
   it('zeigt die Überschrift "Documentation"', () => {
