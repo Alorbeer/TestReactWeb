@@ -1,3 +1,13 @@
+## [betterText] – 2026-06-17
+
+**Autor:** Alexandre Lorbeer
+
+### Commits
+- added more i18n fr, cn
+- added i18n de, en
+
+---
+
 In dieser Datei wird erläutert, wie Visual Studio das Projekt erstellt hat.
 
 Folgende Tools wurden zur Erstellung dieses Projekts verwendet:
