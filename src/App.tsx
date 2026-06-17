@@ -23,7 +23,7 @@ function App() {
         >
           <option value="en">???? English</option>
           <option value="de">???? Deutsch</option>
-          <option value="fr">???? Français</option>
+          <option value="fr">???? FranÃ§ais</option>
           <option value="zh">???? ??</option>
         </select>
         <div className="hero">
