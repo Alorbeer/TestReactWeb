@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation, Trans } from 'react-i18next'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -7,19 +8,33 @@ import './App.css'
 function App() {
   const [count, setCount] = useState(0)
   const [count2, setCount2] = useState(0)
+  const { t, i18n } = useTranslation()
+
+  const currentLang = i18n.language.split('-')[0]
 
   return (
     <>
       <section id="center">
+        <select
+          className="lang-select"
+          value={currentLang}
+          onChange={(e) => i18n.changeLanguage(e.target.value)}
+          aria-label="Select language"
+        >
+          <option value="en">???? English</option>
+          <option value="de">???? Deutsch</option>
+          <option value="fr">???? Français</option>
+          <option value="zh">???? ??</option>
+        </select>
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
           <img src={reactLogo} className="framework" alt="React logo" />
           <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
         <div>
-          <h1>Get started</h1>
+          <h1>{t('hero.title')}</h1>
           <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
+            <Trans i18nKey="hero.editHint" />
           </p>
         </div>
         <button
@@ -27,14 +42,14 @@ function App() {
           className="counter"
           onClick={() => setCount((count) => count + 2)}
         >
-          Count is {count}
+          {t('counter.button1', { count })}
         </button>
         <button
           type="button"
           className="counter"
           onClick={() => setCount2((count2) => (count2 + 1) * 2)}
         >
-          Count 2 is {count2}
+          {t('counter.button2', { count: count2 })}
         </button>
       </section>
 
@@ -45,19 +60,19 @@ function App() {
           <svg className="icon" role="presentation" aria-hidden="true">
             <use href="/icons.svg#documentation-icon"></use>
           </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
+          <h2>{t('docs.title')}</h2>
+          <p>{t('docs.subtitle')}</p>
           <ul>
             <li>
               <a href="https://vite.dev/" target="_blank">
                 <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
+                {t('docs.viteLink')}
               </a>
             </li>
             <li>
               <a href="https://react.dev/" target="_blank">
                 <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
+                {t('docs.reactLink')}
               </a>
             </li>
           </ul>
@@ -66,8 +81,8 @@ function App() {
           <svg className="icon" role="presentation" aria-hidden="true">
             <use href="/icons.svg#social-icon"></use>
           </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
+          <h2>{t('social.title')}</h2>
+          <p>{t('social.subtitle')}</p>
           <ul>
             <li>
               <a href="https://github.com/vitejs/vite" target="_blank">

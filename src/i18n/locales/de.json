@@ -1,0 +1,20 @@
+{
+  "hero": {
+    "title": "Loslegen",
+    "editHint": "Bearbeite <code>src/App.tsx</code> und speichere, um <code>HMR</code> zu testen"
+  },
+  "counter": {
+    "button1": "Zähler: {{count}}",
+    "button2": "Zähler 2: {{count}}"
+  },
+  "docs": {
+    "title": "Dokumentation",
+    "subtitle": "Deine Fragen, beantwortet",
+    "viteLink": "Vite erkunden",
+    "reactLink": "Mehr erfahren"
+  },
+  "social": {
+    "title": "Verbinde dich",
+    "subtitle": "Tritt der Vite-Community bei"
+  }
+}

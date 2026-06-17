@@ -1,0 +1,20 @@
+{
+  "hero": {
+    "title": "Démarrer",
+    "editHint": "Modifiez <code>src/App.tsx</code> et sauvegardez pour tester <code>HMR</code>"
+  },
+  "counter": {
+    "button1": "Compteur : {{count}}",
+    "button2": "Compteur 2 : {{count}}"
+  },
+  "docs": {
+    "title": "Documentation",
+    "subtitle": "Vos questions, répondues",
+    "viteLink": "Explorer Vite",
+    "reactLink": "En savoir plus"
+  },
+  "social": {
+    "title": "Nous rejoindre",
+    "subtitle": "Rejoignez la communauté Vite"
+  }
+}

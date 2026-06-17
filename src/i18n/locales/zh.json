@@ -1,0 +1,20 @@
+{
+  "hero": {
+    "title": "开始使用",
+    "editHint": "编辑 <code>src/App.tsx</code> 并保存以测试 <code>HMR</code>"
+  },
+  "counter": {
+    "button1": "计数：{{count}}",
+    "button2": "计数 2：{{count}}"
+  },
+  "docs": {
+    "title": "文档",
+    "subtitle": "您的问题，一一解答",
+    "viteLink": "探索 Vite",
+    "reactLink": "了解更多"
+  },
+  "social": {
+    "title": "联系我们",
+    "subtitle": "加入 Vite 社区"
+  }
+}
