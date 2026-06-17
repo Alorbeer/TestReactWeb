@@ -33,7 +33,7 @@ jobs:
           MERGE_MSG=$(git log -1 --format="%s")
           echo "Merge-Message: $MERGE_MSG"
 
-          FEATURE=$(echo "$MERGE_MSG" | grep -oP "(?<=Merge branch 'feature/)[^']+")
+          FEATURE=$(echo "$MERGE_MSG" | grep -oP "(?<=Merge branch 'feature/)[^']+" || true)
 
           if [ -z "$FEATURE" ]; then
             echo "Kein Feature-Branch-Merge – Pipeline wird übersprungen."
@@ -55,7 +55,7 @@ jobs:
 
           # Alle Commits des gemergten Branches (zweiter Parent bis gemeinsamer Vorfahre)
           MERGE_BASE=$(git merge-base HEAD~1 HEAD^2 2>/dev/null || git log -1 --format="%P" HEAD | awk '{print $1}')
-          COMMITS=$(git log --oneline "${MERGE_BASE}..HEAD^2" --format="- %s" 2>/dev/null || echo "- (Commits nicht ermittelbar)")
+          COMMITS=$(git log "${MERGE_BASE}..HEAD^2" --format="- %s" 2>/dev/null || echo "- (Commits nicht ermittelbar)")
 
           {
             echo "## [$FEATURE] – $DATE"
