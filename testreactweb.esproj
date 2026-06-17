@@ -9,6 +9,7 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
+    <None Include=".github\scripts\generate_summary.py" />
     <None Include=".github\workflows\auto-changelog.yml" />
     <None Include=".github\workflows\close-review-pr.yml" />
     <None Include=".github\workflows\create-review-pr.yml" />

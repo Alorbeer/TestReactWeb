@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
+import { LanguageSelect } from './LanguageSelect'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -8,24 +9,13 @@ import './App.css'
 function App() {
   const [count, setCount] = useState(0)
   const [count2, setCount2] = useState(0)
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
 
-  const currentLang = i18n.language.split('-')[0]
 
   return (
     <>
       <section id="center">
-        <select
-          className="lang-select"
-          value={currentLang}
-          onChange={(e) => i18n.changeLanguage(e.target.value)}
-          aria-label="Select language"
-        >
-          <option value="en">???? English</option>
-          <option value="de">???? Deutsch</option>
-          <option value="fr">???? Français</option>
-          <option value="zh">???? ??</option>
-        </select>
+        <LanguageSelect />
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
           <img src={reactLogo} className="framework" alt="React logo" />
