@@ -35,8 +35,24 @@ jobs:
 
           FEATURE=$(echo "$MERGE_MSG" | grep -oP "(?<=Merge branch 'feature/)[^']+" || true)
 
+          # Fallback: Branch-Name via git name-rev vom zweiten Parent ermitteln
           if [ -z "$FEATURE" ]; then
-            echo "Kein Feature-Branch-Merge – Pipeline wird übersprungen."
+            echo "Kein Standard-Merge-Format – versuche git name-rev..."
+            BRANCH_NAME=$(git name-rev --name-only HEAD^2 2>/dev/null || true)
+            echo "name-rev Ergebnis: $BRANCH_NAME"
+            FEATURE=$(echo "$BRANCH_NAME" | grep -oP "(?<=feature/)[^~^]+" || true)
+          fi
+
+          # Fallback: Branch-Dekorationen auf dem zweiten Parent prüfen
+          if [ -z "$FEATURE" ]; then
+            echo "Versuche Branch-Dekorationen..."
+            DECORATIONS=$(git log -1 --format="%D" HEAD^2 2>/dev/null || true)
+            echo "Dekorationen: $DECORATIONS"
+            FEATURE=$(echo "$DECORATIONS" | grep -oP "(?<=feature/)[^,\s]+" | head -1 || true)
+          fi
+
+          if [ -z "$FEATURE" ]; then
+            echo "Kein Feature-Branch-Merge erkannt – Pipeline wird übersprungen."
             echo "is_feature_merge=false" >> $GITHUB_OUTPUT
             exit 0
           fi
