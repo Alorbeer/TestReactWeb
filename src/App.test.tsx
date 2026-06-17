@@ -33,7 +33,7 @@ describe('App', () => {
     await user.click(button);
     await user.click(button);
     await user.click(button);
-    expect(screen.getByRole('button', { name: /count is 4/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /count is 6/i })).toBeInTheDocument();
   });
 
   it('zeigt die Überschrift "Documentation"', () => {
