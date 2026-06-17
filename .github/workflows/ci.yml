@@ -32,3 +32,43 @@ jobs:
 
       - name: Build prüfen
         run: npm run build
+
+  deploy:
+    name: GitHub Pages veröffentlichen
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Produktions-Build für GitHub Pages erstellen
+        run: npm run build -- --base=/${{ github.event.repository.name }}/
+
+      - name: Pages-Artefakt hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deploy
+        name: Auf GitHub Pages veröffentlichen
+        uses: actions/deploy-pages@v4
