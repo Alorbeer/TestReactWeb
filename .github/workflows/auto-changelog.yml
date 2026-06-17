@@ -1,0 +1,87 @@
+name: Update Changelog on Feature Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0           # komplette History – alle Feature-Commits verfügbar
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for feature merge & extract name
+        id: meta
+        run: |
+          # Merge-Commit hat 2 Parents – einstellige = normaler Commit
+          PARENT_COUNT=$(git log -1 --format="%P" | wc -w)
+          if [ "$PARENT_COUNT" -lt 2 ]; then
+            echo "Kein Merge-Commit – Pipeline wird übersprungen."
+            echo "is_feature_merge=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Merge-Commit-Message parsen: "Merge branch 'feature/xyz' into main"
+          MERGE_MSG=$(git log -1 --format="%s")
+          echo "Merge-Message: $MERGE_MSG"
+
+          FEATURE=$(echo "$MERGE_MSG" | grep -oP "(?<=Merge branch 'feature/)[^']+")
+
+          if [ -z "$FEATURE" ]; then
+            echo "Kein Feature-Branch-Merge – Pipeline wird übersprungen."
+            echo "is_feature_merge=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "is_feature_merge=true"        >> $GITHUB_OUTPUT
+          echo "feature=$FEATURE"             >> $GITHUB_OUTPUT
+          echo "date=$(date +'%Y-%m-%d')"     >> $GITHUB_OUTPUT
+          echo "author=$(git log -1 --format='%an')" >> $GITHUB_OUTPUT
+
+      - name: Build changelog entry
+        if: steps.meta.outputs.is_feature_merge == 'true'
+        run: |
+          FEATURE="${{ steps.meta.outputs.feature }}"
+          DATE="${{ steps.meta.outputs.date }}"
+          AUTHOR="${{ steps.meta.outputs.author }}"
+
+          # Alle Commits des gemergten Branches (zweiter Parent bis gemeinsamer Vorfahre)
+          MERGE_BASE=$(git merge-base HEAD~1 HEAD^2 2>/dev/null || git log -1 --format="%P" HEAD | awk '{print $1}')
+          COMMITS=$(git log --oneline "${MERGE_BASE}..HEAD^2" --format="- %s" 2>/dev/null || echo "- (Commits nicht ermittelbar)")
+
+          {
+            echo "## [$FEATURE] – $DATE"
+            echo ""
+            echo "**Autor:** $AUTHOR"
+            echo ""
+            echo "### Commits"
+            echo "$COMMITS"
+            echo ""
+            echo "---"
+            echo ""
+          } > /tmp/new_entry.md
+
+          cat /tmp/new_entry.md
+
+      - name: Prepend entry to CHANGELOG.md
+        if: steps.meta.outputs.is_feature_merge == 'true'
+        run: |
+          cat /tmp/new_entry.md CHANGELOG.md > /tmp/merged.md
+          mv /tmp/merged.md CHANGELOG.md
+
+      - name: Commit & push
+        if: steps.meta.outputs.is_feature_merge == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "docs: changelog für feature/${{ steps.meta.outputs.feature }}"
+          git push
