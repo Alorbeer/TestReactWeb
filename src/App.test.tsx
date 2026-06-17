@@ -67,4 +67,36 @@ describe('App', () => {
     const githubLink = screen.getByRole('link', { name: /github/i });
     expect(githubLink).toHaveAttribute('target', '_blank');
   });
+
+  it('Counter 2 startet bei 0', () => {
+    render(<App />);
+    expect(screen.getByRole('button', { name: /count 2 is 0/i })).toBeInTheDocument();
+  });
+
+  it('Counter 2 erhöht sich beim Klick', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const button = screen.getByRole('button', { name: /count 2 is 0/i });
+    await user.click(button);
+    expect(screen.getByRole('button', { name: /count 2 is 2/i })).toBeInTheDocument();
+  });
+
+  it('Counter 2 erhöht sich bei mehreren Klicks', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const button = screen.getByRole('button', { name: /count 2 is 0/i });
+    await user.click(button);
+    await user.click(button);
+    await user.click(button);
+    expect(screen.getByRole('button', { name: /count 2 is 14/i })).toBeInTheDocument();
+  });
+
+  it('Counter 1 und Counter 2 sind unabhängig voneinander', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const button1 = screen.getByRole('button', { name: /count is 0/i });
+    await user.click(button1);
+    expect(screen.getByRole('button', { name: /count is 2/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /count 2 is 0/i })).toBeInTheDocument();
+  });
 });

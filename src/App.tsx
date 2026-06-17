@@ -34,7 +34,7 @@ function App() {
           className="counter"
           onClick={() => setCount2((count2) => (count2 + 1) * 2)}
         >
-          Count is {count2}
+          Count 2 is {count2}
         </button>
       </section>
 
