@@ -1,12 +1,9 @@
 name: 'Projekt einrichten'
-description: 'Code auschecken, Node.js einrichten und Abhängigkeiten installieren'
+description: 'Node.js einrichten und Abhängigkeiten installieren'
 
 runs:
   using: 'composite'
   steps:
-    - name: Code auschecken
-      uses: actions/checkout@v4
-
     - name: Node.js einrichten
       uses: actions/setup-node@v4
       with:

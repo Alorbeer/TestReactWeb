@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Tests ausführen
         uses: ./.github/actions/run-tests
 
@@ -30,6 +32,8 @@ jobs:
       contents: write
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Projekt einrichten
         uses: ./.github/actions/setup-project
 
@@ -69,6 +73,8 @@ jobs:
       url: ${{ steps.pages.outputs.page_url }}
 
     steps:
+      - uses: actions/checkout@v4
+
       - id: pages
         name: Auf GitHub Pages veröffentlichen
         uses: ./.github/actions/deploy-pages
