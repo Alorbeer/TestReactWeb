@@ -1,0 +1,20 @@
+name: 'Tests ausführen'
+description: 'Linting, Unit Tests und Build-Check ausführen'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Projekt einrichten
+      uses: ./.github/actions/setup-project
+
+    - name: Linting
+      run: npm run lint
+      shell: bash
+
+    - name: Unit Tests ausführen
+      run: npm test
+      shell: bash
+
+    - name: Build prüfen
+      run: npm run build
+      shell: bash

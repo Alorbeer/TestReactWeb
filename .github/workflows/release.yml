@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Art der Versionserhöhung'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  test:
+    name: Tests vor Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Tests ausführen
+        uses: ./.github/actions/run-tests
+
+  release:
+    name: Version erhöhen & GitHub Release erstellen
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Projekt einrichten
+        uses: ./.github/actions/setup-project
+
+      - name: Git konfigurieren
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Version erhöhen
+        id: version
+        run: |
+          npm version ${{ inputs.bump }} -m "chore: release v%s"
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Commit & Tag pushen
+        run: git push --follow-tags
+
+      - name: GitHub Release erstellen
+        run: |
+          gh release create v${{ steps.version.outputs.version }} \
+            --title "Release v${{ steps.version.outputs.version }}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  deploy:
+    name: GitHub Pages aktualisieren
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+
+    steps:
+      - id: pages
+        name: Auf GitHub Pages veröffentlichen
+        uses: ./.github/actions/deploy-pages

@@ -9,10 +9,14 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
+    <None Include=".github\actions\deploy-pages\action.yml" />
+    <None Include=".github\actions\run-tests\action.yml" />
+    <None Include=".github\actions\setup-project\action.yml" />
     <None Include=".github\workflows\auto-changelog.yml" />
     <None Include=".github\workflows\close-review-pr.yml" />
     <None Include=".github\workflows\create-review-pr.yml" />
     <None Include=".github\workflows\ci.yml" />
     <None Include=".github\workflows\github-actions-demo.yml" />
+    <None Include=".github\workflows\release.yml" />
   </ItemGroup>
 </Project>

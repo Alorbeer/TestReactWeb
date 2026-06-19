@@ -1,0 +1,26 @@
+name: 'GitHub Pages deployen'
+description: 'Projekt einrichten, Produktions-Build erstellen und auf GitHub Pages veröffentlichen'
+
+outputs:
+  page_url:
+    description: 'URL der veröffentlichten GitHub Page'
+    value: ${{ steps.deploy.outputs.page_url }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Projekt einrichten
+      uses: ./.github/actions/setup-project
+
+    - name: Produktions-Build erstellen
+      run: npm run build -- --base=/${{ github.event.repository.name }}/
+      shell: bash
+
+    - name: Pages-Artefakt hochladen
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: dist
+
+    - id: deploy
+      name: Auf GitHub Pages veröffentlichen
+      uses: actions/deploy-pages@v4

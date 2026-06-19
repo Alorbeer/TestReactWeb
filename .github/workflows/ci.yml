@@ -12,26 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Code auschecken
-        uses: actions/checkout@v4
-
-      - name: Node.js einrichten
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Abhängigkeiten installieren
-        run: npm ci
-
-      - name: Linting
-        run: npm run lint
-
-      - name: Unit Tests ausführen
-        run: npm test
-
-      - name: Build prüfen
-        run: npm run build
+      - name: Tests ausführen
+        uses: ./.github/actions/run-tests
 
   deploy:
     name: GitHub Pages veröffentlichen
@@ -46,29 +28,9 @@ jobs:
 
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.pages.outputs.page_url }}
 
     steps:
-      - name: Code auschecken
-        uses: actions/checkout@v4
-
-      - name: Node.js einrichten
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Abhängigkeiten installieren
-        run: npm ci
-
-      - name: Produktions-Build für GitHub Pages erstellen
-        run: npm run build -- --base=/${{ github.event.repository.name }}/
-
-      - name: Pages-Artefakt hochladen
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-      - id: deploy
+      - id: pages
         name: Auf GitHub Pages veröffentlichen
-        uses: actions/deploy-pages@v4
+        uses: ./.github/actions/deploy-pages
