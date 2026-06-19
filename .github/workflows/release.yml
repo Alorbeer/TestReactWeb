@@ -3,15 +3,10 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      bump:
-        description: 'Art der Versionserhöhung'
+      version:
+        description: 'Neue Versionsnummer (z.B. 1.2.3)'
         required: true
-        default: 'patch'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+        type: string
 
 jobs:
   test:
@@ -34,6 +29,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Version validieren
+        run: |
+          VERSION="${{ inputs.version }}"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Ungültige Versionsnummer '$VERSION'. Erwartet: MAJOR.MINOR.PATCH (z.B. 1.2.3)"
+            exit 1
+          fi
+          CURRENT=$(node -p "require('./package.json').version")
+          HIGHER=$(printf '%s\n%s' "$CURRENT" "$VERSION" | sort -V | tail -1)
+          if [ "$HIGHER" != "$VERSION" ] || [ "$VERSION" = "$CURRENT" ]; then
+            echo "::error::Version '$VERSION' muss größer als die aktuelle Version '$CURRENT' sein"
+            exit 1
+          fi
+          echo "Versionsvalidierung OK: $VERSION > $CURRENT"
+
       - name: Projekt einrichten
         uses: ./.github/actions/setup-project
 
@@ -45,7 +55,7 @@ jobs:
       - name: Version erhöhen
         id: version
         run: |
-          npm version ${{ inputs.bump }} -m "chore: release v%s"
+          npm version ${{ inputs.version }} -m "chore: release v%s"
           echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Commit & Tag pushen
